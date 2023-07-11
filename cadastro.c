@@ -31,15 +31,22 @@ void deleteEntry(FILE* file) {
     FILE* tempFile = fopen("temp.txt", "w");
     char line[MAX_NAME_LENGTH + MAX_EMAIL_LENGTH + 2];
     int found = 0;
+    int skipLine = 0;
 
     while (fgets(line, sizeof(line), file) != NULL) {
+        if (skipLine) {
+            skipLine = 0;
+            continue;
+        }
+
         if (strstr(line, name) == NULL) {
             fputs(line, tempFile);
         } else {
             found = 1;
+            skipLine = 1;
         }
     }
-
+    
     fclose(tempFile);
     fclose(file);
 
@@ -64,8 +71,14 @@ void editEntry(FILE* file) {
     FILE* tempFile = fopen("temp.txt", "w");
     char line[MAX_NAME_LENGTH + MAX_EMAIL_LENGTH + 2];
     int found = 0;
+    int skipLine = 0;
 
     while (fgets(line, sizeof(line), file) != NULL) {
+        if (skipLine) {
+            skipLine = 0;
+            continue;
+        }
+        
         if (strstr(line, name) == NULL) {
             fputs(line, tempFile);
         } else {
@@ -76,6 +89,7 @@ void editEntry(FILE* file) {
             fgets(user.email, MAX_EMAIL_LENGTH, stdin);
             fprintf(tempFile, "%s;%s\n", user.name, user.email);
             found = 1;
+            skipLine = 1;
         }
     }
 
@@ -122,6 +136,8 @@ int main() {
         switch (choice) {
             case 1:
                 addEntry(file);
+                fclose(file);
+                file = fopen("cadastro.txt", "a+");
                 break;
             case 2:
                 deleteEntry(file);
@@ -130,7 +146,11 @@ int main() {
                 editEntry(file);
                 break;
             case 4:
+                fclose(file);
+                file = fopen("cadastro.txt", "a+");
                 viewEntries(file);
+                fclose(file);
+                file = fopen("cadastro.txt", "a+");
                 break;
             case 5:
                 printf("Programa encerrado.\n");
